@@ -1,13 +1,14 @@
 //importing 
-const express = require('express')
+const express = require('express');
 const mongoose = require('mongoose');
 const Messages = require('./dbMessages.js');
+const Rooms = require('./dbRooms');
 const Pusher = require('pusher');
-const Cors = require('cors');
 
 //app config
 const app = express();
 const port = process.env.PORT || 9000;
+
 
 const pusher = new Pusher({
     appId: '1080344',
@@ -16,6 +17,7 @@ const pusher = new Pusher({
     cluster: 'us3',
     encrypted: true
   });
+
 
 //middleware
 app.use(express.json());
@@ -37,10 +39,30 @@ mongoose.connect(connection_url,{
 
 const db = mongoose.connection;
 
+db.once ('open', ()=>{
+    const roomCollection = db.collection('rooms');
+    const changeStream = roomCollection.watch();
+
+    changeStream.on('change', (change) => {
+        if (change.operationType === 'insert') {
+            const roomDetails = change.fullDocument;
+            pusher.trigger('rooms', 'inserted',
+            {
+                roomName: roomDetails.roomName,
+                roomMessages: roomDetails.roomMessages,
+                roomMembers: roomDetails.roomMembers,
+            }) 
+        } else{
+            console.log('error triggering pusher')
+        }
+    })
+})
+
 db.once("open" , ()=> {
     console.log('db connected');
 
     const msgCollection = db.collection('messagecontents');
+   
     const changeStream =msgCollection.watch();
 
     changeStream.on('change', (change) =>{
@@ -63,6 +85,29 @@ db.once("open" , ()=> {
 
 //api routes
 app.get('/', (req,res) => res.status(200).send('hello world!!') );
+
+app.get('/rooms/sync', (req, res) => {
+    Rooms.find( (err,data) =>{
+        if(err){
+            res.status(500).send(err)
+        } else{
+            res.status(200).send(data)
+        }
+    })
+})
+
+app.post ('/rooms/new', (req,res) => {
+    const dbRoom = req.body;
+
+    Rooms.create(dbRoom,(err,data) =>{
+        if (err){
+            res.status(500).send(err)
+        } else {
+            res.status(201).send(`new room created: \n ${data}`)
+        }
+    })
+})
+
 
 app.get('/messages/sync', (req, res) => {
     Messages.find( (err,data) =>{
