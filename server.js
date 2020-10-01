@@ -21,7 +21,6 @@ const pusher = new Pusher({
 
 //middleware
 app.use(express.json());
-//app.use(Cors);
 
     app.use((req,res,next)=> {
         res.setHeader('Access-Control-Allow-Origin', '*');
