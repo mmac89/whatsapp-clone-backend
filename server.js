@@ -52,7 +52,7 @@ db.once ('open', ()=>{
                 roomMembers: roomDetails.roomMembers,
             }) 
         } else{
-            console.log('error triggering pusher')
+            console.log('error triggering pusher rooms')
         }
     })
 })
@@ -77,7 +77,7 @@ db.once("open" , ()=> {
                 received: messageDetails.received,
             })
         } else {
-            console.log('Error triggering pusher');
+            console.log('Error triggering pusher messages');
         }
     })
 });
