@@ -50,6 +50,7 @@ db.once ('open', ()=>{
                 roomName: roomDetails.roomName,
                 roomMessages: roomDetails.roomMessages,
                 roomMembers: roomDetails.roomMembers,
+                roomId: roomDetails._id,
             }) 
         } else{
             console.log('error triggering pusher rooms')
