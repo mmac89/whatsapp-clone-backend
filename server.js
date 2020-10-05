@@ -92,6 +92,7 @@ app.get('/rooms/sync', (req, res) => {
             res.status(500).send(err)
         } else{
             res.status(200).send(data)
+        
         }
     })
 })
@@ -129,6 +130,21 @@ app.post ('/messages/new', (req,res) => {
             res.status(201).send(`new message created: \n ${data}`)
         }
     })
+})
+
+app.get ('/getRoomName/:roomId', (req,res) => {
+    const roomId = req.params.roomId;
+    console.log(roomId);
+    Rooms.findById( req.params,(err,data) =>{
+        if(err){
+            res.status(500).send(err)
+        } else{
+            res.status(200).send(data)
+        
+        }
+    })
+    
+    
 })
 
 //listener
