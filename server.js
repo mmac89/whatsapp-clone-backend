@@ -132,17 +132,21 @@ app.post ('/messages/new', (req,res) => {
     })
 })
 
-app.get ('/getRoomName/:roomId', (req,res) => {
-    const roomId = req.params.roomId;
-    console.log(roomId);
-    Rooms.findById( req.params,(err,data) =>{
+app.get ('/getRoomName/:roomId', async (req,res) => {
+   //console.log(req.params);
+
+    const _id = req.params.roomId;
+
+    const roomName = await Rooms.findById(_id,  (err,data) =>{
         if(err){
             res.status(500).send(err)
         } else{
-            res.status(200).send(data)
+            res.status(200).send(data.roomName);
+            console.log(data.roomName);
         
         }
     })
+    
     
     
 })
