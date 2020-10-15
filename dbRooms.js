@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const whatsappRoomSchema = mongoose.Schema (
     {
+        roomId: String,
         roomName: String,
         roomMessages: Array,
         roomMemebers: Array,

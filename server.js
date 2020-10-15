@@ -39,6 +39,7 @@ mongoose.connect(connection_url,{
 const db = mongoose.connection;
 
 db.once ('open', ()=>{
+    console.log('db connected');
     const roomCollection = db.collection('rooms');
     const changeStream = roomCollection.watch();
 
@@ -109,6 +110,18 @@ app.post ('/rooms/new', (req,res) => {
     })
 })
 
+// app.get('/messages/:roomId/sync', async (req, res) => {
+//     const _id = req.params.roomId;
+
+//     const messages = await Rooms.findById(_id,  (err,data) =>{
+//         if(err){
+//             res.status(500).send(err)
+//         } else{
+//             res.status(200).send(data.roomMessages);
+        
+//         }
+//     })
+// })
 
 app.get('/messages/sync', (req, res) => {
     Messages.find( (err,data) =>{
@@ -133,7 +146,7 @@ app.post ('/messages/new', (req,res) => {
 })
 
 app.get ('/getRoomName/:roomId', async (req,res) => {
-   //console.log(req.params);
+
 
     const _id = req.params.roomId;
 
@@ -142,7 +155,6 @@ app.get ('/getRoomName/:roomId', async (req,res) => {
             res.status(500).send(err)
         } else{
             res.status(200).send(data.roomName);
-            console.log(data.roomName);
         
         }
     })
