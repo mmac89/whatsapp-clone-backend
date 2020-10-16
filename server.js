@@ -110,33 +110,46 @@ app.post ('/rooms/new', (req,res) => {
     })
 })
 
-// app.get('/messages/:roomId/sync', async (req, res) => {
-//     const _id = req.params.roomId;
 
-//     const messages = await Rooms.findById(_id,  (err,data) =>{
+
+// app.get('/messages/sync', (req, res) => {
+//     Messages.find( (err,data) =>{
 //         if(err){
 //             res.status(500).send(err)
 //         } else{
-//             res.status(200).send(data.roomMessages);
-        
+//             res.status(200).send(data)
 //         }
 //     })
 // })
 
-app.get('/messages/sync', (req, res) => {
-    Messages.find( (err,data) =>{
-        if(err){
-            res.status(500).send(err)
-        } else{
-            res.status(200).send(data)
-        }
-    })
-})
+// app.post ('/messages/new', (req,res) => {
+//     const dbMessage = req.body;
 
-app.post ('/messages/new', (req,res) => {
+//     Messages.create(dbMessage,(err,data) =>{
+//         if (err){
+//             res.status(500).send(err)
+//         } else {
+//             res.status(201).send(`new message created: \n ${data}`)
+//         }
+//     })
+// })
+
+
+app.post ('/messages/:roomId/new', (req,res) => {
     const dbMessage = req.body;
+    const _id = req.params.roomId;
 
-    Messages.create(dbMessage,(err,data) =>{
+    
+    Rooms._id.roomMessages.push(dbMessage, (err,data) =>{
+        if (err){
+            res.status(500).send(err)
+        } else {
+            console.log('this is the new message '+data);
+            res.status(201).send(`new message created: \n ${data}`)
+        }
+    });
+
+    Rooms.create(dbMessage,(err,data) =>{
         if (err){
             res.status(500).send(err)
         } else {
@@ -154,7 +167,8 @@ app.get ('/getRoomName/:roomId', async (req,res) => {
         if(err){
             res.status(500).send(err)
         } else{
-            res.status(200).send(data.roomName);
+            console.log(data);
+            res.status(200).send(data);
         
         }
     })
