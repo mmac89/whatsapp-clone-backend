@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Messages = require('./dbMessages.js');
 const Rooms = require('./dbRooms');
 const Pusher = require('pusher');
+const { update } = require('./dbMessages.js');
 
 //app config
 const app = express();
@@ -53,7 +54,15 @@ db.once ('open', ()=>{
                 roomMembers: roomDetails.roomMembers,
                 roomId: roomDetails._id,
             }) 
-        // else if (change.operationType === '')
+        } else if (change.operationType === 'update'){
+            const roomDetails= update.fullDocument;
+            pusher.trigger('rooms', 'updated', 
+            {
+                roomName: roomDetails.roomName,
+                roomMessages: roomDetails.roomMessages,
+                roomMembers: roomDetails.roomMembers,
+                roomId: roomDetails._id,
+            })
         } else{
             console.log('error triggering pusher rooms')
         }
