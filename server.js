@@ -53,6 +53,7 @@ db.once ('open', ()=>{
                 roomMembers: roomDetails.roomMembers,
                 roomId: roomDetails._id,
             }) 
+        // else if (change.operationType === '')
         } else{
             console.log('error triggering pusher rooms')
         }
@@ -135,27 +136,20 @@ app.post ('/rooms/new', (req,res) => {
 // })
 
 
-app.post ('/messages/:roomId/new', (req,res) => {
+app.post ('/messages/:roomId/new', async (req,res) => {
     const dbMessage = req.body;
     const _id = req.params.roomId;
 
-    
-    Rooms._id.roomMessages.push(dbMessage, (err,data) =>{
+    const room = await Rooms.findById(_id, (err,data) =>{   
         if (err){
             res.status(500).send(err)
-        } else {
-            console.log('this is the new message '+data);
-            res.status(201).send(`new message created: \n ${data}`)
-        }
+        } else{
+            res.status(201).send(data);
+        }  
     });
+    room.roomMessages.push(dbMessage);
 
-    Rooms.create(dbMessage,(err,data) =>{
-        if (err){
-            res.status(500).send(err)
-        } else {
-            res.status(201).send(`new message created: \n ${data}`)
-        }
-    })
+    const updatedRoom = await room.save(); 
 })
 
 app.get ('/getRoomName/:roomId', async (req,res) => {
