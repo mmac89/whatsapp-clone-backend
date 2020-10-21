@@ -50,20 +50,31 @@ db.once ('open', ()=>{
             pusher.trigger('rooms', 'inserted',
             {
                 roomName: roomDetails.roomName,
-                roomMessages: roomDetails.roomMessages,
+                roomMessages: {
+                    name: roomDetails.roomMessages.name,
+                    message: roomDetails.roomMessage.message,
+                    timestamp: roomDetails.roomMessage.timestamp,
+                    received: roomDetails.roomMessage.received,
+                },
                 roomMembers: roomDetails.roomMembers,
                 roomId: roomDetails._id,
             }) 
-        } else if (change.operationType === 'update'){
-            const roomDetails= update.fullDocument;
-            pusher.trigger('rooms', 'updated', 
+        } else if (change.operationType === 'update') {
+            const roomDetails = change.fullDocument;
+            pusher.trigger('rooms','updated',
             {
                 roomName: roomDetails.roomName,
-                roomMessages: roomDetails.roomMessages,
+                roomMessages: {
+                    name: roomDetails.roomMessages.name,
+                    message: roomDetails.roomMessage.message,
+                    timestamp: roomDetails.roomMessage.timestamp,
+                    received: roomDetails.roomMessage.received,
+                },
                 roomMembers: roomDetails.roomMembers,
                 roomId: roomDetails._id,
             })
-        } else{
+
+        }else{
             console.log('error triggering pusher rooms')
         }
     })
