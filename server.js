@@ -44,7 +44,10 @@ db.once ('open', ()=>{
     const roomCollection = db.collection('rooms');
     const changeStream = roomCollection.watch();
 
+
     changeStream.on('change', (change) => {
+
+        console.log(`there has been a room change ${change}`);
         if (change.operationType === 'insert') {
             const roomDetails = change.fullDocument;
             pusher.trigger('rooms', 'inserted',
@@ -60,19 +63,10 @@ db.once ('open', ()=>{
                 roomId: roomDetails._id,
             }) 
         } else if (change.operationType === 'update') {
-            const roomDetails = change.fullDocument;
-            pusher.trigger('rooms','updated',
-            {
-                roomName: roomDetails.roomName,
-                roomMessages: {
-                    name: roomDetails.roomMessages.name,
-                    message: roomDetails.roomMessage.message,
-                    timestamp: roomDetails.roomMessage.timestamp,
-                    received: roomDetails.roomMessage.received,
-                },
-                roomMembers: roomDetails.roomMembers,
-                roomId: roomDetails._id,
-            })
+            // console.log(change.data);
+            // const roomDetails = change.fullDocument;
+            // console.log(roomDetails);
+            pusher.trigger('rooms','updated',console.log('newMessage'))
 
         }else{
             console.log('error triggering pusher rooms')
@@ -181,7 +175,7 @@ app.get ('/getRoomName/:roomId', async (req,res) => {
         if(err){
             res.status(500).send(err)
         } else{
-            console.log(data);
+            //console.log(data);
             res.status(200).send(data);
         
         }
