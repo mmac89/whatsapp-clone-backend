@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const Messages = require('./dbMessages.js');
 const Rooms = require('./dbRooms');
 const Pusher = require('pusher');
-const { update } = require('./dbMessages.js');
+const { update, updateOne } = require('./dbMessages.js');
 
 //app config
 const app = express();
@@ -42,13 +42,12 @@ const db = mongoose.connection;
 db.once ('open', ()=>{
     console.log('db connected');
     const roomCollection = db.collection('rooms');
-    const changeStream = roomCollection.watch();
+    const changeStream = roomCollection.watch({fullDocument: "updateLookup"});
 
     changeStream.on('change', (change) => {
-
-        console.log(`there has been a room change ${change}`);
+        const roomDetails = change.fullDocument;
+        console.log(`there has been a change `);
         if (change.operationType === 'insert') {
-            const roomDetails = change.fullDocument;
             pusher.trigger('rooms', 'inserted',
             {
                 roomName: roomDetails.roomName,
@@ -60,37 +59,42 @@ db.once ('open', ()=>{
                 },
                 roomMembers: roomDetails.roomMembers,
                 roomId: roomDetails._id,
-            }) 
+            })
+        }else if(change.operationType === 'update'){
+            const messageDetails= change.updateDescription.updatedFields;
+            console.log(roomDetails);
+            console.log(messageDetails);
+            pusher.trigger('rooms','updated',
+            {
+                roomMessages: roomDetails.roomMessages
+            })
         }else{
             console.log('error triggering pusher rooms')
         }
     })
 });
 
-db.once("open" , ()=> {
-    console.log('db connected');
+// name: roomDetails.roomMessages.name,
+// message: roomDetails.roomMessages.message,
+// timestamp: roomDetails.roomMessages.timestamp,
+// received: roomDetails.roomMessages.received,
+// db.once("open" , ()=> {
+//     console.log('db connected');
 
-    const msgCollection = db.collection('rooms');
+//     const msgCollection = db.collection('rooms');
    
-    const changeStream =msgCollection.watch();
+//     const changeStream =msgCollection.watch();
 
-    changeStream.on('change', (change) =>{
-        console.log('A change occured',change);
+//     changeStream.on('change', (change) =>{
+//         console.log('A change occured',change);
 
-        if (change.operationType === 'insert') {
-            const messageDetails= change.updateDescription.updatedFields;
-            console.log(messageDetails);
-            pusher.trigger('messages','updated',
-            {
-                message: messageDetails.message,
-                timestamp: messageDetails.timestamp,
-                received: messageDetails.received,
-            })
-        } else {
-            console.log('Error triggering pusher messages');
-        }
-    })
-});
+//         if (change.operationType === 'update') {
+            
+//         } else {
+//             console.log('Error triggering pusher messages');
+//         }
+//     })
+// });
 
 // db.once("open" , ()=> {
 //     console.log('db connected');
