@@ -44,7 +44,6 @@ db.once ('open', ()=>{
     const roomCollection = db.collection('rooms');
     const changeStream = roomCollection.watch();
 
-
     changeStream.on('change', (change) => {
 
         console.log(`there has been a room change ${change}`);
@@ -62,22 +61,16 @@ db.once ('open', ()=>{
                 roomMembers: roomDetails.roomMembers,
                 roomId: roomDetails._id,
             }) 
-        } else if (change.operationType === 'update') {
-            // console.log(change.data);
-            // const roomDetails = change.fullDocument;
-            // console.log(roomDetails);
-            pusher.trigger('rooms','updated',console.log('newMessage'))
-
         }else{
             console.log('error triggering pusher rooms')
         }
     })
-})
+});
 
 db.once("open" , ()=> {
     console.log('db connected');
 
-    const msgCollection = db.collection('messagecontents');
+    const msgCollection = db.collection('rooms');
    
     const changeStream =msgCollection.watch();
 
@@ -85,10 +78,10 @@ db.once("open" , ()=> {
         console.log('A change occured',change);
 
         if (change.operationType === 'insert') {
-            const messageDetails= change.fullDocument;
-            pusher.trigger('messages','inserted',
+            const messageDetails= change.updateDescription.updatedFields;
+            console.log(messageDetails);
+            pusher.trigger('messages','updated',
             {
-                name: messageDetails.name,
                 message: messageDetails.message,
                 timestamp: messageDetails.timestamp,
                 received: messageDetails.received,
@@ -98,6 +91,31 @@ db.once("open" , ()=> {
         }
     })
 });
+
+// db.once("open" , ()=> {
+//     console.log('db connected');
+
+//     const msgCollection = db.collection('messagecontents');
+   
+//     const changeStream =msgCollection.watch();
+
+//     changeStream.on('change', (change) =>{
+//         console.log('A change occured',change);
+
+//         if (change.operationType === 'insert') {
+//             const messageDetails= change.fullDocument;
+//             pusher.trigger('messages','inserted',
+//             {
+//                 name: messageDetails.name,
+//                 message: messageDetails.message,
+//                 timestamp: messageDetails.timestamp,
+//                 received: messageDetails.received,
+//             })
+//         } else {
+//             console.log('Error triggering pusher messages');
+//         }
+//     })
+// });
 
 //api routes
 app.get('/', (req,res) => res.status(200).send('hello world!!') );
