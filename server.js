@@ -48,12 +48,7 @@ db.once("open", () => {
     if (change.operationType === "insert") {
       pusher.trigger("rooms", "inserted", {
         roomName: roomDetails.roomName,
-        roomMessages: {
-          name: roomDetails.roomMessages.name,
-          message: roomDetails.roomMessage.message,
-          timestamp: roomDetails.roomMessage.timestamp,
-          sent: roomDetails.roomMessage.sent,
-        },
+        roomMessages: {},
         roomMembers: roomDetails.roomMembers,
         roomId: roomDetails._id,
       });
@@ -67,6 +62,11 @@ db.once("open", () => {
     }
   });
 });
+
+// name: roomDetails.roomMessages.name,
+//           message: roomDetails.roomMessage.message,
+//           timestamp: roomDetails.roomMessage.timestamp,
+//           sent: roomDetails.roomMessage.sent,
 
 //========api routes========
 app.get("/", (req, res) => res.status(200).send("hello world!!"));
@@ -87,6 +87,7 @@ app.post("/rooms/new", (req, res) => {
     if (err) {
       res.status(500).send(err);
     } else {
+        console.log(data);
       res.status(201).send(`new room created: \n ${data}`);
     }
   });
