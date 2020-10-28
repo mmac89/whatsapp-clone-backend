@@ -62,8 +62,8 @@ db.once ('open', ()=>{
             })
         }else if(change.operationType === 'update'){
             const messageDetails= change.updateDescription.updatedFields;
-            console.log(roomDetails);
-            console.log(messageDetails);
+            // console.log(roomDetails);
+            // console.log(messageDetails);
             pusher.trigger('rooms','updated',
             {
                 roomMessages: roomDetails.roomMessages
@@ -174,6 +174,7 @@ app.post ('/rooms/new', (req,res) => {
 
 app.post ('/messages/:roomId/new', async (req,res) => {
     const dbMessage = req.body;
+    
     const _id = req.params.roomId;
 
     const room = await Rooms.findById(_id, (err,data) =>{   
@@ -181,10 +182,12 @@ app.post ('/messages/:roomId/new', async (req,res) => {
             res.status(500).send(err)
         } else{
             res.status(201).send(data);
+            console.log('this is the new message -->   '+ data);
         }  
     });
     room.roomMessages.push(dbMessage);
 
+    console.log('this is the new message -->   '+ room);
     const updatedRoom = await room.save(); 
 })
 
