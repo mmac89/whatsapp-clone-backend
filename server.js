@@ -1,12 +1,11 @@
-//importing
+//========importing========
 const express = require("express");
 const mongoose = require("mongoose");
 const Messages = require("./dbMessages.js");
 const Rooms = require("./dbRooms");
 const Pusher = require("pusher");
-const { update, updateOne } = require("./dbMessages.js");
 
-//app config
+//========app config========
 const app = express();
 const port = process.env.PORT || 9000;
 
@@ -18,7 +17,7 @@ const pusher = new Pusher({
   encrypted: true,
 });
 
-//middleware
+//========middleware========
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -27,7 +26,7 @@ app.use((req, res, next) => {
   next();
 });
 
-//DB config
+//========DB config========
 const connection_url =
   "mongodb+srv://admin:cytArANdYNcb2q6i@cluster0.1u5rd.mongodb.net/whatsappdb?retryWrites=true&w=majority";
 mongoose.connect(connection_url, {
@@ -60,8 +59,6 @@ db.once("open", () => {
       });
     } else if (change.operationType === "update") {
       const messageDetails = change.updateDescription.updatedFields;
-      // console.log(roomDetails);
-      // console.log(messageDetails);
       pusher.trigger("rooms", "updated", {
         roomMessages: roomDetails.roomMessages,
       });
@@ -71,54 +68,7 @@ db.once("open", () => {
   });
 });
 
-// name: roomDetails.roomMessages.name,
-// message: roomDetails.roomMessages.message,
-// timestamp: roomDetails.roomMessages.timestamp,
-// received: roomDetails.roomMessages.received,
-// db.once("open" , ()=> {
-//     console.log('db connected');
-
-//     const msgCollection = db.collection('rooms');
-
-//     const changeStream =msgCollection.watch();
-
-//     changeStream.on('change', (change) =>{
-//         console.log('A change occured',change);
-
-//         if (change.operationType === 'update') {
-
-//         } else {
-//             console.log('Error triggering pusher messages');
-//         }
-//     })
-// });
-
-// db.once("open" , ()=> {
-//     console.log('db connected');
-
-//     const msgCollection = db.collection('messagecontents');
-
-//     const changeStream =msgCollection.watch();
-
-//     changeStream.on('change', (change) =>{
-//         console.log('A change occured',change);
-
-//         if (change.operationType === 'insert') {
-//             const messageDetails= change.fullDocument;
-//             pusher.trigger('messages','inserted',
-//             {
-//                 name: messageDetails.name,
-//                 message: messageDetails.message,
-//                 timestamp: messageDetails.timestamp,
-//                 received: messageDetails.received,
-//             })
-//         } else {
-//             console.log('Error triggering pusher messages');
-//         }
-//     })
-// });
-
-//api routes
+//========api routes========
 app.get("/", (req, res) => res.status(200).send("hello world!!"));
 
 app.get("/rooms/sync", (req, res) => {
@@ -133,7 +83,6 @@ app.get("/rooms/sync", (req, res) => {
 
 app.post("/rooms/new", (req, res) => {
   const dbRoom = req.body;
-
   Rooms.create(dbRoom, (err, data) => {
     if (err) {
       res.status(500).send(err);
@@ -143,44 +92,20 @@ app.post("/rooms/new", (req, res) => {
   });
 });
 
-// app.get('/messages/sync', (req, res) => {
-//     Messages.find( (err,data) =>{
-//         if(err){
-//             res.status(500).send(err)
-//         } else{
-//             res.status(200).send(data)
-//         }
-//     })
-// })
-
-// app.post ('/messages/new', (req,res) => {
-//     const dbMessage = req.body;
-
-//     Messages.create(dbMessage,(err,data) =>{
-//         if (err){
-//             res.status(500).send(err)
-//         } else {
-//             res.status(201).send(`new message created: \n ${data}`)
-//         }
-//     })
-// })
-
 app.post("/messages/:roomId/new", async (req, res) => {
   const dbMessage = req.body;
-
   const _id = req.params.roomId;
-
   const room = await Rooms.findById(_id, (err, data) => {
     if (err) {
       res.status(500).send(err);
     } else {
       res.status(201).send(data);
-      console.log("this is the new message -->   " + data);
+      //   console.log("this is the new message -->   " + data);
     }
   });
   room.roomMessages.push(dbMessage);
 
-  console.log("this is the new message -->   " + room);
+  //   console.log("this is the new message -->   " + room);
   const updatedRoom = await room.save();
 });
 
@@ -191,11 +116,10 @@ app.get("/getRoomName/:roomId", async (req, res) => {
     if (err) {
       res.status(500).send(err);
     } else {
-      //console.log(data);
       res.status(200).send(data);
     }
   });
 });
 
-//listener
+//========listener========
 app.listen(port, () => console.log(`listening on port ${port}`));
